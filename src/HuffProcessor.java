@@ -18,6 +18,7 @@ public class HuffProcessor {
 	public static final int PSEUDO_EOF = ALPH_SIZE;
 	public static final int HUFF_NUMBER = 0xface8200;
 	public static final int HUFF_TREE  = HUFF_NUMBER | 1;
+	int magic;
 
 	private final int myDebugLevel;
 	
@@ -59,12 +60,75 @@ public class HuffProcessor {
 	 *            Buffered bit stream writing to the output file.
 	 */
 	public void decompress(BitInputStream in, BitOutputStream out){
-
+		
+     
+     
 		while (true){
 			int val = in.readBits(BITS_PER_WORD);
 			if (val == -1) break;
 			out.writeBits(BITS_PER_WORD, val);
+			
 		}
 		out.close();
 	}
+	
+    private HuffNode ReadTreeHeader(BitInputStream in) {
+
+    	
+    	int magic = in.readBits(BITS_PER_INT);
+		
+		if(magic != HUFF_TREE) {
+			throw new HuffException("illegal header starts with" + magic);
+		} //exception thrown when file of compressed bits does not start with 32 bit value.
+     
+    	if(magic < 0) {
+       	 throw new HuffException("illegal header starts with" + magic);
+        }
+	//do a preorder traversal of the tree.
+    	if(magic == 0) {
+    		HuffNode left = ReadTreeHeader(in);
+    		HuffNode right = ReadTreeHeader(in);
+    		return new HuffNode(0,0,left,right);
+    	}
+    	else {
+    		int val = in.readBits(BITS_PER_WORD + 1);
+    		HuffNode ans = new HuffNode(val,0,null,null);
+    		return ans;
+    	}
+    	
+    	
+
+	
+}
+    private HuffNode readCompressedBits(BitInputStream in) {
+    	HuffNode root;
+		HuffNode current =  root; 
+    	   while (true) {
+    	       int bits = in.readBits(1);
+    	       if (bits == -1) {
+    	           throw new HuffException("bad input, no PSEUDO_EOF");
+    	       }
+    	       else { 
+    	           if (bits == 0) current = current.left;
+    	        	
+    	        	   
+    	      else current = current.right;
+
+    	           if (current.value == 1) {
+    	               if (current.value == PSEUDO_EOF) 
+    	                   break;   // out of loop
+    	               else {
+    	                   write bits for current.value;
+    	                   current = root; // start back after leaf
+    	               }
+    	           }
+    	       }
+    	   }
+    	
+		return null;
+    	
+    }
+	
+	
+	
 }
