@@ -47,7 +47,7 @@ public class HuffProcessor {
 		HuffNode root = makeTreeFromCounts(counts);
 		String[] codings = makeCodingsFromTree(root);
 		out.writeBits(BITS_PER_INT, HUFF_TREE);
-		WriteHeader(root, out);
+		writeHeader(root, out);
 		
 		in.reset();
 		writeCompressedBits(codings, in, out);
@@ -61,14 +61,35 @@ public class HuffProcessor {
 	
 	
 	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
+	
+		while (true) {
+			int bits = in.readBits(BITS_PER_WORD);
+			if (bits == -1) 
+				break;
+			String code = codings[bits];
+			out.writeBits(code.length(), Integer.parseInt(code,2));
+		}
+		String code = codings[PSEUDO_EOF];
+		out.writeBits(code.length(), Integer.parseInt(code,2));//BitInputStream ;
+		
 		
 	// TODO Auto-generated method stub
 	
 }
 
-	private void WriteHeader(HuffNode root, BitOutputStream out) {
+	private void writeHeader(HuffNode root, BitOutputStream out) {
 	// TODO Auto-generated method stub
 	
+		if(root.myLeft != null || root.myRight != null) {
+			out.writeBits(1, 0);
+			writeHeader(root.myLeft,out);
+			writeHeader(root.myRight,out);
+			
+		}
+		else {
+			out.writeBits(1, 1);
+			out.writeBits(BITS_PER_WORD + 1, root.myValue);
+		}
 }
 
 	private String[] makeCodingsFromTree(HuffNode root) {
@@ -84,17 +105,18 @@ public class HuffProcessor {
 	        encodings[root.myValue] = path;
 	        return;
 	   }
-		
-			codingHelper(root.myLeft, path+"1",encodings );
+		if(root.myLeft != null) {
+			codingHelper(root.myLeft, path+"0",encodings );
+		}
+		if(root.myLeft != null) {
 			codingHelper(root.myRight,path+"1",encodings );		
+		}
 		
 
 	}
 
 	private HuffNode makeTreeFromCounts(int[] counts) {
 		PriorityQueue<HuffNode> pq = new PriorityQueue<>();
-
-
 		for(int k=0; k < counts.length; k++) {
 			if(counts[k] > 0) {
 				 pq.add(new HuffNode(k,counts[k],null,null));
@@ -106,7 +128,7 @@ public class HuffProcessor {
 		while (pq.size() > 1) {
 		    HuffNode left = pq.remove();// pick the left one
 		    HuffNode right = pq.remove();// pick the right one
-		    HuffNode poop = new HuffNode(-1,left.myWeight+right.myWeight,left,right); //-1 starts from the end, adds the weights and then make left and right sub trees.
+		    HuffNode poop = new HuffNode(0,left.myWeight+right.myWeight,left,right); //-1 starts from the end, adds the weights and then make left and right sub trees.
 		    // create new HuffNode t with weight from
 		    // left.weight+right.weight and left, right subtrees
 		    pq.add(poop); // combine both of them and add to the pq
@@ -122,11 +144,11 @@ public class HuffProcessor {
 		int bits = in.readBits(BITS_PER_WORD);
 		while(bits> 0) {
 		abc[bits] +=1;	
-		abc[PSEUDO_EOF] = 1 ; //write it once
+		 //write it once
 		 bits = in.readBits(BITS_PER_WORD);
 		
 		}
-		
+		abc[PSEUDO_EOF] = 1 ;
 	// TODO Auto-generated method stub
 	return abc;
 }
@@ -149,7 +171,7 @@ public class HuffProcessor {
 		} //exception thrown when file of compressed bits does not start with 32 bit value.
      
 		HuffNode head=readTreeHeader(in);
-		readCompressedBits(in,  head, out);
+		readCompressedBits(head, in, out);
 		out.close();
 	}
 	
@@ -178,7 +200,7 @@ public class HuffProcessor {
 }
     
     
-    private void readCompressedBits(BitInputStream in,HuffNode root,BitOutputStream out) {
+    private void readCompressedBits(HuffNode root,BitInputStream in,BitOutputStream out) {
     	
 		HuffNode current =  root; 
     	   while (true) {
