@@ -19,14 +19,9 @@ public class HuffProcessor {
 	public static final int PSEUDO_EOF = ALPH_SIZE;
 	public static final int HUFF_NUMBER = 0xface8200;
 	public static final int HUFF_TREE  = HUFF_NUMBER | 1;
-	int magic;
+	int magic;//
 
 	private final int myDebugLevel;
-	
-	
-	
-	
-	
 	
 	public static final int DEBUG_HIGH = 4;
 	public static final int DEBUG_LOW = 1;
@@ -39,9 +34,6 @@ public class HuffProcessor {
 		myDebugLevel = debug;
 	}
 //FARZEENNAJAMA
-	
-	//decompress changing the zeros and ones to actual texts and compressing is changing to 0 and 1
-	//compressing is changing files to 0 and 1
 	/**
 	 * Compresses a file. Process must be reversible and loss-less.
 	 *
@@ -50,15 +42,12 @@ public class HuffProcessor {
 	 * @param out
 	 *            Buffered bit stream writing to the output file.
 	 */
-	public void compress(BitInputStream in, BitOutputStream out){//in is bunch of 0 and 1
+	public void compress(BitInputStream in, BitOutputStream out){
 		int [] counts = readForCounts(in);
-		
-		///
 		HuffNode root = makeTreeFromCounts(counts);
 		String[] codings = makeCodingsFromTree(root);
 		out.writeBits(BITS_PER_INT, HUFF_TREE);
 		writeHeader(root, out);
-		
 		
 		in.reset();
 		writeCompressedBits(codings, in, out);
@@ -67,7 +56,7 @@ public class HuffProcessor {
 	
 	
 	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
-		
+	
 		while (true) {
 			int bits = in.readBits(BITS_PER_WORD);
 			if (bits == -1) 
@@ -134,7 +123,7 @@ public class HuffProcessor {
 		while (pq.size() > 1) {
 		    HuffNode left = pq.remove();// pick the left one
 		    HuffNode right = pq.remove();// pick the right one
-		    HuffNode poop = new HuffNode(-1,left.myWeight+right.myWeight,left,right); //-1 starts from the end, adds the weights and then make left and right sub trees.
+		    HuffNode poop = new HuffNode(0,left.myWeight+right.myWeight,left,right); //-1 starts from the end, adds the weights and then make left and right sub trees.
 		    // create new HuffNode t with weight from
 		    // left.weight+right.weight and left, right subtrees
 		    pq.add(poop); // combine both of them and add to the pq
@@ -181,26 +170,22 @@ public class HuffProcessor {
 		out.close();
 	}
 	
-    private HuffNode readTreeHeader(BitInputStream in) {//in is a compressed file in 0 and 1 and we are trying to
-    	//obtain the information endocode in it
+    private HuffNode readTreeHeader(BitInputStream in) {
 
     	
-    	int bits = in.readBits(1);//it reads the first bit of the group of zeros and ones
-    	//this method move to the right whenever it's called and does not read the same bit again
+    	int bits = in.readBits(1);
      
-    	if(bits > 0) {
-       	 throw new HuffException("illegal");
+    	if(bits ==-1) {
+       	 throw new HuffException("illegal header starts with" + bits);
         }
 	//do a preorder traversal of the tree.
     	if(bits == 0) {
-    		HuffNode left = readTreeHeader(in);//
+    		HuffNode left = readTreeHeader(in);
     		HuffNode right = readTreeHeader(in);
-    		return new HuffNode(0,0,left,right);// it creates new node and put the recursion values to its children
+    		return new HuffNode(0,0,left,right);
     	}
     	else {
-    		int val = in.readBits(BITS_PER_WORD + 1);//when we get one in the in, we 
-    		//read the next nine bits form the in file and stored the 0 and one to store the text encoded
-    		//in the tree and put it in the leaf.
+    		int val = in.readBits(BITS_PER_WORD + 1);
     		return new HuffNode(val,0,null,null);
     		
     	}
@@ -211,7 +196,7 @@ public class HuffProcessor {
     
     
     private void readCompressedBits(HuffNode root,BitInputStream in,BitOutputStream out) {
-    	//the decompressed file in the nine bits
+    	
 		HuffNode current =  root; 
     	   while (true) {
     	       int bits = in.readBits(1);
@@ -232,7 +217,7 @@ public class HuffProcessor {
     	                  break;
     	        	   // out of loop
     	               else {
-    	                   out.writeBits(BITS_PER_WORD,current.myValue);//current.myValue=bits;
+    	                   out.writeBits(BITS_PER_WORD, current.myValue);//current.myValue=bits;
     	                   current = root; // start back after leaf
     	               //}
     	           }
