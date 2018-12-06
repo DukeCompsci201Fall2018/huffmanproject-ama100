@@ -31,7 +31,7 @@ public class HuffProcessor {
 	public HuffProcessor(int debug) {
 		myDebugLevel = debug;
 	}
-
+//FARZEENNAJAMA
 	/**
 	 * Compresses a file. Process must be reversible and loss-less.
 	 *
