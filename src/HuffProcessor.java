@@ -51,11 +51,6 @@ public class HuffProcessor {
 		
 		in.reset();
 		writeCompressedBits(codings, in, out);
-		while (true){
-			int val = in.readBits(BITS_PER_WORD);
-			if (val == -1) break;
-			out.writeBits(BITS_PER_WORD, val);
-		}
 		out.close();
 	}
 	
@@ -92,9 +87,9 @@ public class HuffProcessor {
 		}
 }
 
-	private String[] makeCodingsFromTree(HuffNode root) {
+	private String[] makeCodingsFromTree(HuffNode head) {
 		 String[] encodings = new String[ALPH_SIZE + 1];
-		 codingHelper(root,"",encodings);
+		 codingHelper(head,"",encodings);
 
 		 
 	return encodings;
@@ -115,11 +110,11 @@ public class HuffProcessor {
 
 	}
 
-	private HuffNode makeTreeFromCounts(int[] counts) {
+	private HuffNode makeTreeFromCounts(int[] abc) {
 		PriorityQueue<HuffNode> pq = new PriorityQueue<>();
-		for(int k=0; k < counts.length; k++) {
-			if(counts[k] > 0) {
-				 pq.add(new HuffNode(k,counts[k],null,null));
+		for(int k=0; k < abc.length; k++) {
+			if(abc[k] > 0) {
+				 pq.add(new HuffNode(k,abc[k],null,null));
 			}
 			
 		   
@@ -191,8 +186,8 @@ public class HuffProcessor {
     	}
     	else {
     		int val = in.readBits(BITS_PER_WORD + 1);
-    		HuffNode ans = new HuffNode(val,0,null,null);
-    		return ans;
+    		return new HuffNode(val,0,null,null);
+    		
     	}
     	
 
@@ -212,14 +207,15 @@ public class HuffProcessor {
     	           if (bits == 0) current = current.myLeft; //0 left
     	        	
     	        	   
-    	      else current = current.myRight; //right--1
+    	           	else current = current.myRight; //right--1
 
     	          // if (current.myValue == 1) {
     	        	   
     	        	   if (current.myLeft == null && current.myRight == null) {
-    	               if (current.myValue == PSEUDO_EOF) 
-    	                  return;
-    	        	   }// out of loop
+    	        		  
+    	        		   if (current.myValue == PSEUDO_EOF) 
+    	                  break;
+    	        	   // out of loop
     	               else {
     	                   out.writeBits(BITS_PER_WORD, current.myValue);//current.myValue=bits;
     	                   current = root; // start back after leaf
@@ -233,5 +229,5 @@ public class HuffProcessor {
     }
 	
 	
-	
+    }	
 }
