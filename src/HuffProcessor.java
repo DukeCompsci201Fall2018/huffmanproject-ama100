@@ -62,14 +62,37 @@ public class HuffProcessor {
 	
 	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
 		
+		int read = in.readBits(BITS_PER_WORD + 1);
+		readForCounts(in);
+		 
+		
+		 out.writeBits(codings[read].length(), Integer.parseInt(codings[read],2));
+		 read = in.readBits(BITS_PER_WORD + 1);
+		 out.writeBits(codings[PSEUDO_EOF].length(), Integer.parseInt(codings[PSEUDO_EOF],2));
+	}
+	private void WriteHeader(HuffNode root, BitOutputStream out) {
+		out.writeBits(BITS_PER_INT, HUFF_TREE);
+		writeTree(root,out);
 	// TODO Auto-generated method stub
 	
 }
 
-	private void WriteHeader(HuffNode root, BitOutputStream out) {
-	// TODO Auto-generated method stub
-	
-}
+	private void  writeTree(HuffNode root, BitOutputStream out) {
+		if(root.myLeft == null && root.myRight== null) {
+			out.writeBits(1, 1);
+			out.writeBits(BITS_PER_WORD + 1, root.myValue);
+		}
+		
+		if(root.myLeft !=null && root.myRight != null) {
+			out.writeBits(1, 0);
+			 writeTree(root.myRight,out);
+			 writeTree(root.myLeft, out);
+			
+			
+			
+		}
+		
+	}
 
 	private String[] makeCodingsFromTree(HuffNode root) {
 		 String[] encodings = new String[ALPH_SIZE + 1];
@@ -84,7 +107,10 @@ public class HuffProcessor {
 	        encodings[root.myValue] = string;
 	        return;
 	   }
+		
+		
 		if(root.myLeft != null) {
+			
 			codingHelper(root.myLeft, string+"0",encodings );
 			
 			
