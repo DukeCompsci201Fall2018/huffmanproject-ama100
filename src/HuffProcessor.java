@@ -1,3 +1,4 @@
+import java.util.PriorityQueue;
 
 /**
  * Although this class has a history of several years,
@@ -57,7 +58,10 @@ public class HuffProcessor {
 		}
 		out.close();
 	}
+	
+	
 	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
+		
 	// TODO Auto-generated method stub
 	
 }
@@ -68,18 +72,67 @@ public class HuffProcessor {
 }
 
 	private String[] makeCodingsFromTree(HuffNode root) {
-	// TODO Auto-generated method stub
-	return null;
+		 String[] encodings = new String[ALPH_SIZE + 1];
+		 codingHelper(root,"",encodings);
+
+		 
+	return encodings;
 }
+//String path="";
+	private void codingHelper(HuffNode root, String string, String[] encodings) {
+		if (root.myRight == null && root.myLeft== null) {
+	        encodings[root.myValue] = string;
+	        return;
+	   }
+		if(root.myLeft != null) {
+			codingHelper(root.myLeft, string+"0",encodings );
+			
+			
+		}
+		if(root.myRight != null) {
+			codingHelper(root.myRight, string+"1",encodings );		
+		}
+
+	}
 
 	private HuffNode makeTreeFromCounts(int[] counts) {
+		PriorityQueue<HuffNode> pq = new PriorityQueue<>();
+
+
+		for(int k=0; k < counts.length; k++) {
+			if(counts[k] > 0) {
+				 pq.add(new HuffNode(k,counts[k],null,null));
+			}
+			
+		   
+		}
+
+		while (pq.size() > 1) {
+		    HuffNode left = pq.remove();// pick the left one
+		    HuffNode right = pq.remove();// pick the right one
+		    HuffNode poop = new HuffNode(-1,left.myWeight+right.myWeight,left,right); //-1 starts from the end, adds the weights and then make left and right sub trees.
+		    // create new HuffNode t with weight from
+		    // left.weight+right.weight and left, right subtrees
+		    pq.add(poop); // combine both of them and add to the pq
+		}
+		HuffNode root = pq.remove(); // in the end we have one tree. from that one tree we get the root.
+
 	// TODO Auto-generated method stub
-	return null;
+	return root;
 }
 
 	private int[] readForCounts(BitInputStream in) {
+		int[] abc = new int[ALPH_SIZE + 1];
+		int bits = in.readBits(BITS_PER_WORD);
+		while(bits> 0) {
+		abc[bits] +=1;	
+		abc[PSEUDO_EOF] = 1 ; //write it once
+		 bits = in.readBits(BITS_PER_WORD);
+		
+		}
+		
 	// TODO Auto-generated method stub
-	return null;
+	return abc;
 }
 
 	/**
