@@ -45,7 +45,11 @@ public class HuffProcessor {
 		int [] counts = readForCounts(in);
 		HuffNode root = makeTreeFromCounts(counts);
 		String[] codings = makeCodingsFromTree(root);
-
+		out.writeBits(BITS_PER_INT, HUFF_TREE);
+		WriteHeader(root, out);
+		
+		in.reset();
+		writeCompressedBits(codings, in, out);
 		while (true){
 			int val = in.readBits(BITS_PER_WORD);
 			if (val == -1) break;
@@ -53,6 +57,16 @@ public class HuffProcessor {
 		}
 		out.close();
 	}
+	private void writeCompressedBits(String[] codings, BitInputStream in, BitOutputStream out) {
+	// TODO Auto-generated method stub
+	
+}
+
+	private void WriteHeader(HuffNode root, BitOutputStream out) {
+	// TODO Auto-generated method stub
+	
+}
+
 	private String[] makeCodingsFromTree(HuffNode root) {
 	// TODO Auto-generated method stub
 	return null;
@@ -113,6 +127,8 @@ public class HuffProcessor {
 
 	
 }
+    
+    
     private void readCompressedBits(BitInputStream in,HuffNode root,BitOutputStream out) {
     	
 		HuffNode current =  root; 
