@@ -23,6 +23,11 @@ public class HuffProcessor {
 
 	private final int myDebugLevel;
 	
+	
+	
+	
+	
+	
 	public static final int DEBUG_HIGH = 4;
 	public static final int DEBUG_LOW = 1;
 	
@@ -47,6 +52,8 @@ public class HuffProcessor {
 	 */
 	public void compress(BitInputStream in, BitOutputStream out){//in is bunch of 0 and 1
 		int [] counts = readForCounts(in);
+		
+		///
 		HuffNode root = makeTreeFromCounts(counts);
 		String[] codings = makeCodingsFromTree(root);
 		out.writeBits(BITS_PER_INT, HUFF_TREE);
