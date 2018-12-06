@@ -107,13 +107,13 @@ public class HuffProcessor {
     private HuffNode readTreeHeader(BitInputStream in) {
 
     	
-    	
+    	int bits = in.readBits(1);
      
-    	if(magic ==-1) {
-       	 throw new HuffException("illegal header starts with" + magic);
+    	if(bits ==-1) {
+       	 throw new HuffException("illegal header starts with" + bits);
         }
 	//do a preorder traversal of the tree.
-    	if(magic == 0) {
+    	if(bits == 0) {
     		HuffNode left = readTreeHeader(in);
     		HuffNode right = readTreeHeader(in);
     		return new HuffNode(0,0,left,right);
