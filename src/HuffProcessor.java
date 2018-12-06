@@ -19,7 +19,7 @@ public class HuffProcessor {
 	public static final int PSEUDO_EOF = ALPH_SIZE;
 	public static final int HUFF_NUMBER = 0xface8200;
 	public static final int HUFF_TREE  = HUFF_NUMBER | 1;
-	int magic;//
+	private int magic;//
 
 	private final int myDebugLevel;
 	
@@ -245,7 +245,7 @@ public class HuffProcessor {
     				}
     			}
     		}
-
+//
     		//return current;
 
     	}
