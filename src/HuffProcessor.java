@@ -96,12 +96,11 @@ public class HuffProcessor {
     		return ans;
     	}
     	
-    	
 
 	
 }
-    private HuffNode readCompressedBits(BitInputStream in) {
-    	HuffNode root;
+    private HuffNode readCompressedBits(BitInputStream in,HuffNode root,BitOutputStream out) {
+    	
 		HuffNode current =  root; 
     	   while (true) {
     	       int bits = in.readBits(1);
@@ -109,23 +108,26 @@ public class HuffProcessor {
     	           throw new HuffException("bad input, no PSEUDO_EOF");
     	       }
     	       else { 
-    	           if (bits == 0) current = current.left;
+    	           if (bits == 0) current = current.myLeft; //0 left
     	        	
     	        	   
-    	      else current = current.right;
+    	      else current = current.myRight; //right--1
 
-    	           if (current.value == 1) {
-    	               if (current.value == PSEUDO_EOF) 
-    	                   break;   // out of loop
+    	          // if (current.myValue == 1) {
+    	        	   
+    	        	   if (current.myLeft == null && current.myRight == null) {
+    	               if (current.myValue == PSEUDO_EOF) 
+    	                   break;
+    	        	   }// out of loop
     	               else {
-    	                   write bits for current.value;
+    	                   out.writeBits(bits, current.myValue);//current.myValue=bits;
     	                   current = root; // start back after leaf
-    	               }
+    	               //}
     	           }
     	       }
     	   }
     	
-		return null;
+		return current;
     	
     }
 	
